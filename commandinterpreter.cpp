@@ -31,6 +31,7 @@ CommandInterpreter::CommandInterpreter(QObject *parent) :
 
     // setup alias
     dispatch["quit"] = dispatch["exit"];
+    debugMode = false;
 }
 
 void CommandInterpreter::populateMetaMethods()
@@ -198,6 +199,16 @@ void CommandInterpreter::cmdLog(QString filename)
 void CommandInterpreter::cmdCloseLog()
 {
     fileLogger.close();
+}
+
+void CommandInterpreter::cmdDebug()
+{
+    debugMode = !debugMode;
+    if (debugMode) {
+        emit write(QString("Debug mode enabled\n"));
+    } else {
+        emit write(QString("Debug mode disabled\n"));
+    }
 }
 
 

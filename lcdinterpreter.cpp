@@ -34,7 +34,9 @@ void LCDInterpreter::cmdKey()
 {
     CHECK_PORT_OPEN();
     QByteArray data("!K\n");
-    qDebug() << "write " << qHexdump(data);
+    if (isDebugMode()) {
+        emit write(QString("write ") + qHexdump(data));
+    }
     port->write(data);
 
 }
@@ -43,7 +45,9 @@ void LCDInterpreter::cmdInfo()
 {
     CHECK_PORT_OPEN();
     QByteArray data("!I\n");
-    qDebug() << "write " << qHexdump(data);
+    if (isDebugMode()) {
+        emit write(QString("write ") + qHexdump(data));
+    }
     port->write(data);
 }
 
@@ -51,16 +55,15 @@ void LCDInterpreter::cmdImage(QString fileName)
 {
     CHECK_PORT_OPEN();
     QImage image(fileName);
-    if ((image.width() != 800) ||
-            (image.height() != 480)) {
-        emit write(QString("Image has the wrong format, %1x%2 should be 800x480\n").arg(image.width()).arg(image.height()));
-        return;
-    }
-
     QByteArray data;
-    for (int y = 0; y < image.height(); y++) {
-        for (int x = 0; x < image.width(); x++) {
-            QRgb pixel = image.pixel(x, y);
+    for (int y = 0; y < 480; y++) {
+        for (int x = 0; x < 800; x++) {
+            QRgb pixel;
+            if (x >= image.width() || y >= image.height()) {
+                pixel = 0;
+            } else {
+                pixel = image.pixel(x, y);
+            }
             float red = qRed(pixel);
             float green = qGreen(pixel);
             float blue = qBlue(pixel);
@@ -79,8 +82,9 @@ void LCDInterpreter::cmdImage(QString fileName)
         emit write(QString("Could not lZ4 compress image\n"));
         return;
     }
-    qDebug() << "orig data " << qHexdump(data);
-    qDebug() << "compressed " << data.size() << " bytes to " << len;
+    if (isDebugMode()) {
+        emit write(QString("compressed %1 bytes to %2\n").arg(data.size()).arg(len));
+    }
 
     QByteArray d2;
     d2.append('!');
@@ -91,7 +95,9 @@ void LCDInterpreter::cmdImage(QString fileName)
     d2.append(len >> 0);
     d2.append(output, len);
     d2.append('\n');
-    qDebug() << "write " << qHexdump(d2);
+    if (isDebugMode()) {
+        emit write(QString("write ") + d2);
+    }
     port->write(d2);
 
 }
@@ -102,13 +108,15 @@ void LCDInterpreter::cmdSetLed(int led, int red, int green)
     QByteArray data;
     data.append('!');
     data.append('E');
-    leds[led] = (red & 0xF) << 4 | (green & 0xF);
+    leds[led] = ((red & 0xF) << 4) | (green & 0xF);
     for (int i = 0; i < 16; i++)
     {
         data.append(leds[i]);
     }
     data.append('\n');
-    qDebug() << "write " << qHexdump(data);
+    if (isDebugMode()) {
+        emit write(QString("write ") + qHexdump(data));
+    }
     port->write(data);
 }
 
@@ -120,7 +128,7 @@ void LCDInterpreter::cmdOpen(QString device)
     }
 
     PortSettings settings = {
-        BAUD115200,
+        BAUD230400,
         DATA_8,
         PAR_NONE,
         STOP_1,
@@ -166,7 +174,9 @@ void LCDInterpreter::onBytesAvailable()
 
 void LCDInterpreter::processBytes(QByteArray data)
 {
-    qDebug() << "read\n" << qHexdump(data);
+    if (isDebugMode()) {
+        emit write(QString("read ") + qHexdump(data));
+    }
     foreach(const char &c, data)
     {
         processByte((unsigned char)c);
@@ -247,8 +257,14 @@ QString LCDInterpreter::CommandToString(LCD_COMMAND cmd)
     case SET_SCREEN_OK_CMD:
         return "setScreenOK";
 
+    case SET_LED_CMD:
+        return "setLed";
+
+    case SET_LED_OK_CMD:
+        return "setLedOk";
+
     default:
-        return "unknowNCmd";
+        return "unknownCmd";
 
     }
 }

@@ -20,7 +20,9 @@ public:
         GET_INFO_CMD = 'I',
         SCREEN_INFO_CMD = 'i',
         SET_SCREEN_CMD = 'F',
-        SET_SCREEN_OK_CMD = 'f'
+        SET_SCREEN_OK_CMD = 'f',
+        SET_LED_CMD = 'E',
+        SET_LED_OK_CMD = 'e'
     };
 
     static QString CommandToString(LCD_COMMAND cmd);

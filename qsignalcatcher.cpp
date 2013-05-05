@@ -8,7 +8,6 @@ namespace Console {
 QSignalCatcher signalCatcher;
 
 static void on_sigint(int sig) {
-    printf("signal catcher\n");
     signalCatcher.onSignal(sig);
 }
 

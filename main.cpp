@@ -11,8 +11,16 @@
 
 #include <readline/readline.h>
 
+Console::Console *console = NULL;
+
 void real_exit()
 {
+    if (console) {
+        qDebug() << "killing console";
+        console->_quit();
+        console->wait();
+        delete console;
+    }
     exit(0);
 }
 
@@ -25,8 +33,8 @@ int main(int argc, char *argv[])
 
     QObject::connect(&Console::signalCatcher, SIGNAL(sigint()), &a, SLOT(quit()));
 
-    LCDInterpreter *interpreter = new LCDInterpreter();
-    Console::Console *console = new Console::Console("lcd", interpreter);
+    LCDInterpreter *interpreter = new LCDInterpreter(console);
+    console = new Console::Console("lcd", interpreter);
 
     QObject::connect(&a, SIGNAL(aboutToQuit()), console, SLOT(terminate()));
 
@@ -35,10 +43,8 @@ int main(int argc, char *argv[])
     ret = a.exec();
 
     console->_quit();
-//    console->wait();
+    console->wait();
     delete console;
-    delete interpreter;
-
 
     rl_free_line_state();
     rl_cleanup_after_signal();

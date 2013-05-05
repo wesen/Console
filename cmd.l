@@ -21,7 +21,6 @@ static bool lexWhitespace = false;
   result.append(QVariant(yytext));
 }
 -?[0-9]+ {
-  result.append(QVariant(yytext));
   bool ok = false;
   long long _i = QString(yytext).toLongLong(&ok);
   if (!ok) {

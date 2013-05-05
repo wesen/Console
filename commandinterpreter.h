@@ -29,6 +29,8 @@ public:
     void listCommands();
     friend class Console;
 
+    bool isDebugMode() { return debugMode; }
+
 signals:
     void write(QString s);
     void writeAsync(QString s);
@@ -38,6 +40,7 @@ public slots:
     virtual void handleLine(QString s, QVariantList args);
 
     virtual void cmdExit();
+    virtual void cmdDebug();
     virtual void cmdHelp(QString cmd);
     virtual void cmdLog(QString filename);
     virtual void cmdCloseLog();
@@ -49,6 +52,7 @@ protected:
     QMap<QString, QMetaMethod> dispatch;
     QScriptEngine engine;
     FileLogger fileLogger;
+    bool debugMode;
 };
 
 }
