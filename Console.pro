@@ -41,7 +41,15 @@ LIBS += -L/usr/local/lib -lreadline.6.2 -lhistory.6.2
 }
 
 win32 {
-LIBS += -lreadline -lhistory
+    LIBS += -lreadline -lhistory
+    LIBS += -L$$PWD/vendor/win32/lib
+    DESTDIR_WIN = $$DESTDIR
+    DESTDIR_WIN ~= s,/,\\,g
+    EXTRA_BINFILES += $$PWD/vendor/win32/bin/*.dll
+    EXTRA_BINFILES ~= s,/,\\,g
+    for(FILE, EXTRA_BINFILES) {
+        QMAKE_POST_LINK += $$quote(copy /y \"$${FILE}\" \"$${DESTDIR_WIN}\"$$escape_expand(\\n\\t))
+    }
 # LIBS += -static-libgcc
 }
 
