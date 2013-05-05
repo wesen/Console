@@ -15,12 +15,12 @@ public:
     virtual ~LCDInterpreter();
 
     enum LCD_COMMAND {
-        GET_KEY_CMD = 1,
-        KEY_INFO_CMD = 2,
-        GET_INFO_CMD = 3,
-        SCREEN_INFO_CMD = 4,
-        SET_SCREEN_CMD = 5,
-        SET_SCREEN_OK_CMD = 6
+        GET_KEY_CMD = 'K',
+        KEY_INFO_CMD = 'k',
+        GET_INFO_CMD = 'I',
+        SCREEN_INFO_CMD = 'i',
+        SET_SCREEN_CMD = 'F',
+        SET_SCREEN_OK_CMD = 'f'
     };
 
     static QString CommandToString(LCD_COMMAND cmd);
@@ -48,7 +48,7 @@ protected:
 
     enum PARSE_STATE {
         NONE = 0,
-        CMD_BYTE = 1,
+        CMD_START = 1,
         CMD_LEN0 = 2,
         CMD_LEN1 = 3,
         CMD_LEN2 = 4,

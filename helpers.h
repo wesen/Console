@@ -17,4 +17,8 @@
 
 #define Q(string) ((QString)string).toStdString().c_str()
 
+QString qHexdump(QByteArray a);
+QString qHexdumpShort(QByteArray a, int pad = 16);
+
+
 #endif // HELPERS_H

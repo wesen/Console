@@ -20,7 +20,8 @@ SOURCES += console.cpp \
    qsignalcatcher.cpp \
     lcdinterpreter.cpp \
     vendor/lz4.c \
-    main.cpp
+    main.cpp \
+    helpers.cpp
 
 HEADERS += console.h\
    commandinterpreter.h \
