@@ -32,7 +32,8 @@ public slots:
 
     void cmdKey();
     void cmdInfo();
-    void cmdImage(QString image);
+    void cmdImage(QString fileName);
+    void cmdSetLed(int led, int red, int green);
 
 protected slots:
     void onBytesAvailable();
@@ -55,6 +56,8 @@ protected:
         CMD_DATA = 6,
         CMD_CRC = 7
     } state;
+
+    unsigned char leds[16];
 
     LCD_COMMAND cmd;
     unsigned int cmdLength;

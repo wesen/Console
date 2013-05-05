@@ -1,11 +1,15 @@
+#include <QImage>
+#include <QDebug>
+
 #include "lcdinterpreter.h"
+#include "vendor/lz4.h"
 #include "vendor/qextserialport/src/qextserialport.h"
 #include "vendor/qextserialport/src/qextserialenumerator.h"
 
 
 #define CHECK_PORT_OPEN() { \
     if (port == NULL) { \
-    emit(write(QString("Serial port has not been opened."))); \
+    emit(write(QString("Serial port has not been opened.\n"))); \
     return; \
     } \
 }
@@ -13,8 +17,8 @@
 
 LCDInterpreter::LCDInterpreter(QObject *parent) :
     Console::CommandInterpreter(parent),
-    port(NULL),
-    state(NONE)
+    state(NONE),
+    port(NULL)
 {
     populateMetaMethods();
 }
@@ -27,24 +31,87 @@ LCDInterpreter::~LCDInterpreter()
 void LCDInterpreter::cmdKey()
 {
     CHECK_PORT_OPEN();
+    port->write("!K\n");
 
 }
 
 void LCDInterpreter::cmdInfo()
 {
     CHECK_PORT_OPEN();
+    port->write("!I\n");
+}
+
+void LCDInterpreter::cmdImage(QString fileName)
+{
+    CHECK_PORT_OPEN();
+    QImage image(fileName);
+    if ((image.width() != 800) ||
+            (image.height() != 480)) {
+        emit write(QString("Image has the wrong format, %1x%2 should be 800x480\n").arg(image.width()).arg(image.height()));
+        return;
+    }
+
+    QByteArray data;
+    for (int y = 0; y < image.height(); y++) {
+        for (int x = 0; x < image.width(); x++) {
+            QRgb pixel = image.pixel(x, y);
+            data.append(qRed(pixel));
+            data.append(qGreen(pixel));
+            data.append(qBlue(pixel));
+        }
+    }
+    const char *_data = data.constData();
+    char output[data.size()];
+    int len = LZ4_compress(_data, output, data.size());
+    if (len <= 0) {
+        emit write(QString("Could not lZ4 compress image\n"));
+        return;
+    }
+
+    QByteArray d2;
+    d2.append('!');
+    d2.append('f');
+    d2.append(len >> 24);
+    d2.append(len >> 16);
+    d2.append(len >> 8);
+    d2.append(len >> 0);
+    d2.append(output, len);
+    d2.append('\n');
+    port->write(d2);
 
 }
 
-void LCDInterpreter::cmdImage(QString image)
+void LCDInterpreter::cmdSetLed(int led, int red, int green)
 {
     CHECK_PORT_OPEN();
-
+    QByteArray data;
+    data.append('!');
+    data.append('E');
+    leds[led] = (red & 0xF) << 4 | (green & 0xF);
+    for (int i = 0; i < 16; i++)
+    {
+        data.append(leds[i]);
+    }
+    data.append('\n');
+    port->write(data);
 }
 
 void LCDInterpreter::cmdOpen(QString device)
 {
+    if (port != NULL) {
+        emit(write(QString("Close serial port first.\n")));
+        return;
+    }
 
+    port = new QextSerialPort(device, QextSerialPort::EventDriven, this);
+    connect(port, SIGNAL(readyRead()), this, SLOT(onBytesAvailable()));
+    port->open(QIODevice::ReadWrite);
+    state = NONE;
+    cmdLength = 0;
+    crc = 0;
+    for (int i = 0; i < 16; i++) {
+        leds[i] = 0;
+    }
 }
 
 void LCDInterpreter::cmdList()
@@ -60,6 +127,10 @@ void LCDInterpreter::cmdList()
 void LCDInterpreter::cmdClose()
 {
     CHECK_PORT_OPEN();
+
+    port->close();
+    delete port;
+    port = NULL;
 
 }
 

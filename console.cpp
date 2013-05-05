@@ -150,6 +150,7 @@ Console::Console(QString _name, CommandInterpreter *_interpreter) :
     }
 
     moveToThread(this);
+    interpreter->moveToThread(this);
 //    rl_bind_key('\t', readline_completion);
 }
 

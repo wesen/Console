@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       -= gui
+QT       += gui
 QT += script core
 
 TARGET = Console
@@ -19,6 +19,7 @@ SOURCES += console.cpp \
    filelogger.cpp \
    qsignalcatcher.cpp \
     lcdinterpreter.cpp \
+    vendor/lz4.c \
     main.cpp
 
 HEADERS += console.h\
@@ -27,7 +28,8 @@ HEADERS += console.h\
    qsignalcatcher.h \
         Console_global.h \
     helpers.h \
-    lcdinterpreter.h
+    lcdinterpreter.h \
+    vendor/lz4.h
 
 OTHER_FILES += \
     flex.pri
