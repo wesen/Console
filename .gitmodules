@@ -1,0 +1,3 @@
+[submodule "vendor/qextserialport"]
+	path = vendor/qextserialport
+	url = https://code.google.com/p/qextserialport/

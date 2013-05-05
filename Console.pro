@@ -5,24 +5,29 @@
 #-------------------------------------------------
 
 QT       -= gui
-QT += script
+QT += script core
 
 TARGET = Console
-TEMPLATE = lib
+TEMPLATE = app
+CONFIG += console exceptions
+CONFIG -= app_bundle
 
 DEFINES += CONSOLE_LIBRARY
 
 SOURCES += console.cpp \
    commandinterpreter.cpp \
    filelogger.cpp \
-   qsignalcatcher.cpp
+   qsignalcatcher.cpp \
+    lcdinterpreter.cpp \
+    main.cpp
 
 HEADERS += console.h\
    commandinterpreter.h \
    filelogger.h \
    qsignalcatcher.h \
         Console_global.h \
-    helpers.h
+    helpers.h \
+    lcdinterpreter.h
 
 OTHER_FILES += \
     flex.pri
@@ -40,3 +45,5 @@ LIBS += -lreadline -lhistory
 FLEXSOURCES += cmd.l
 
 include(flex.pri)
+
+include(vendor/qextserialport/src/qextserialport.pri)

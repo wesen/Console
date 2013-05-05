@@ -137,7 +137,17 @@ Console::Console(QString _name, CommandInterpreter *_interpreter) :
 
     using_history();
     historyFile = QDir::homePath() + Q(QString("/.%1_history").arg(name));
-    read_history(historyFile.toAscii().constData());
+    QFile f(historyFile);
+    if (!f.exists()) {
+        if (!f.open(QIODevice::ReadWrite)) {
+            qDebug() << "Could not create history file";
+        } else {
+            f.close();
+        }
+    }
+    if (f.exists()) {
+        read_history(historyFile.toAscii().constData());
+    }
 
     moveToThread(this);
 //    rl_bind_key('\t', readline_completion);
