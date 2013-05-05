@@ -17,6 +17,9 @@ static bool lexWhitespace = false;
 [a-zA-Z/]([a-zA-Z\-_0-9/]|\\.)* {
   result.append(QVariant(yytext));
 }
+[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12} {
+  result.append(QVariant(yytext));
+}
 -?[0-9]+ {
   result.append(QVariant(yytext));
   bool ok = false;
